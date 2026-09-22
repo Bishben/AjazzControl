@@ -25,8 +25,25 @@ public class Main {
         System.out.println("Device opened successfully!");
         byte[] buffer = new byte[64];
 
-        while (true) {
-            int bytesRead = device.read(buffer, 1000);
+        byte[] writeData = new byte[32];
+        writeData[0] = (byte) 170;
+        writeData[1] = 85;
+        writeData[2] = (byte) 204;
+        writeData[3] = 51;   
+        writeData[4] = 14;
+
+        int writtenData = device.write(writeData, writeData.length, (byte) 0);
+        System.out.println("Written " + writtenData + " bytes to the device.");
+
+        int bytesRead = device.read(buffer, 1000);
+        for (int i = 0; i < bytesRead; i++) {
+            System.out.printf("%02X ", buffer[i] & 0xFF);
+        }
+
+
+        int run = 0;
+        while (run == 1) {
+            bytesRead = device.read(buffer, 1000);
 
             if (bytesRead > 0) {
                 System.out.print("Received: ");
