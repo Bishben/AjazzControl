@@ -86,6 +86,19 @@ public class Main {
         System.out.println("Set response time to Level " + responseTime + ". Written " + writtenData + " bytes to the device.");
     }
 
+    public static void setTurnOffLed(HidDevice device) {
+        byte[] writeData = new byte[32];
+        writeData[0] = (byte) 170;
+        writeData[1] = 85;
+        writeData[2] = (byte) 204;
+        writeData[3] = 51;   
+        writeData[4] = 7;  
+        writeData[5] = 6;
+
+        int writtenData = device.write(writeData, writeData.length, (byte) 0);
+        System.out.println("Turned off LED. Written " + writtenData + " bytes to the device.");
+    }
+
     public static void main(String[] args) {
 
         HidServices hidServices = HidManager.getHidServices();
@@ -109,6 +122,7 @@ public class Main {
         //requestStatusData(device);
         //setSleepTime(device, 2);
         //setResponseTime(device, 1);
+        setTurnOffLed(device);
 
         int run = 0;
         while (run == 1) {
