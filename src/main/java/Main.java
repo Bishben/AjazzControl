@@ -37,17 +37,35 @@ public class Main {
     }
 
     public static void requestStatusData(HidDevice device) {
-        byte[] requestData = new byte[32];
-        requestData[0] = (byte) 170;
-        requestData[1] = 85;
-        requestData[2] = (byte) 204;
-        requestData[3] = 51;   
-        requestData[4] = 14;
+        byte[] writeData = new byte[32];
+        writeData[0] = (byte) 170;
+        writeData[1] = 85;
+        writeData[2] = (byte) 204;
+        writeData[3] = 51;   
+        writeData[4] = 14;
 
-        int writtenData = device.write(requestData, requestData.length, (byte) 0);
+        int writtenData = device.write(writeData, writeData.length, (byte) 0);
         System.out.println("Requested status data. Written " + writtenData + " bytes to the device.");
 
         parseStatusData(device);
+    }
+
+    public static void setSleepTime(HidDevice device, int sleepTime) {
+        if (sleepTime < 1 || sleepTime > 4) {
+            System.out.println("[-] Invalid sleep time. Must be between 1 and 4.");
+            return;
+        }
+
+        byte[] writeData = new byte[32];
+        writeData[0] = (byte) 170;
+        writeData[1] = 85;
+        writeData[2] = (byte) 204;
+        writeData[3] = 51;   
+        writeData[4] = 12;  
+        writeData[5] = (byte) sleepTime;
+
+        int writtenData = device.write(writeData, writeData.length, (byte) 0);
+        System.out.println("Set sleep time to Level " + sleepTime + ". Written " + writtenData + " bytes to the device.");
     }
 
     public static void main(String[] args) {
@@ -70,7 +88,9 @@ public class Main {
 
         System.out.println("Device opened successfully!");
 
-        requestStatusData(device);
+        //requestStatusData(device);
+
+        setSleepTime(device, 2);
 
         int run = 0;
         while (run == 1) {
