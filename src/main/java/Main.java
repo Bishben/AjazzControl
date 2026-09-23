@@ -4,55 +4,18 @@ import org.hid4java.HidServices;
 
 public class Main {
 
-    public static void main(String[] args) {
-
-        HidServices hidServices = HidManager.getHidServices();
-
-        HidDevice device = hidServices.getAttachedHidDevices().stream().filter(d -> d.getVendorId() == 0x1A2C && d.getProductId() == 0x8FFF && d.getInterfaceNumber() == 0).findFirst().orElse(null);
-
-        if (device == null) {
-            System.out.println("[-] Device not found");
-            return;
-        }
-
-        System.out.println("Device Found\nOpening device...");
-
-        if (device.open() == false) {
-            System.out.println("Failed to open device.");
-            return;
-        }
-
-        System.out.println("Device opened successfully!");
+    public static void parseStatusData(HidDevice device) {
         byte[] buffer = new byte[64];
-
-        byte[] writeData = new byte[32];
-        writeData[0] = (byte) 170;
-        writeData[1] = 85;
-        writeData[2] = (byte) 204;
-        writeData[3] = 51;   
-        writeData[4] = 14;
-
-        int writtenData = device.write(writeData, writeData.length, (byte) 0);
-        System.out.println("Written " + writtenData + " bytes to the device.");
-
         int bytesRead = device.read(buffer, 1000);
-        for (int i = 0; i < bytesRead; i++) {
-            System.out.printf("%02X ", buffer[i] & 0xFF);
-        }
 
+        if (bytesRead > 0) {
+            System.out.print("Received: ");
 
-        int run = 0;
-        while (run == 1) {
-            bytesRead = device.read(buffer, 1000);
+            for (int i = 0; i < bytesRead; i++) {
+                System.out.printf("%02X ", buffer[i] & 0xFF);
+            }
 
-            if (bytesRead > 0) {
-                System.out.print("Received: ");
-
-                for (int i = 0; i < bytesRead; i++) {
-                    System.out.printf("%02X ", buffer[i] & 0xFF);
-                }
-
-                System.out.println();
+            System.out.println();
 
                 int batteryPercentage = buffer[5] & 0xFF;
 
@@ -70,7 +33,58 @@ public class Main {
                 System.out.println("Connection Mode: " + connectionModeStr);
                 System.out.println("Charging Status: " + chargingStatus);
                 System.out.println("Firmware Version: " + firmwareVersion);
-            }
+        }
+    }
+
+    public static void requestStatusData(HidDevice device) {
+        byte[] requestData = new byte[32];
+        requestData[0] = (byte) 170;
+        requestData[1] = 85;
+        requestData[2] = (byte) 204;
+        requestData[3] = 51;   
+        requestData[4] = 15;
+
+        int writtenData = device.write(requestData, requestData.length, (byte) 0);
+        System.out.println("Requested status data. Written " + writtenData + " bytes to the device.");
+
+        parseStatusData(device);
+    }
+
+    public static void main(String[] args) {
+
+        HidServices hidServices = HidManager.getHidServices();
+
+        HidDevice device = hidServices.getAttachedHidDevices().stream().filter(d -> d.getVendorId() == 0x1A2C && d.getProductId() == 0x8FFF && d.getInterfaceNumber() == 0).findFirst().orElse(null);
+
+        if (device == null) {
+            System.out.println("[-] Device not found");
+            return;
+        }
+
+        System.out.println("Device Found\nOpening device...");
+
+        if (device.open() == false) {
+            System.out.println("[-] Failed to open device.");
+            return;
+        }
+
+        System.out.println("Device opened successfully!");
+
+        byte[] writeData = new byte[32];
+        writeData[0] = (byte) 170;
+        writeData[1] = 85;
+        writeData[2] = (byte) 204;
+        writeData[3] = 51;   
+        writeData[4] = 14;
+
+        int writtenData = device.write(writeData, writeData.length, (byte) 0);
+        System.out.println("Written " + writtenData + " bytes to the device.");
+
+        requestStatusData(device);
+
+        int run = 0;
+        while (run == 1) {
+            parseStatusData(device);
         }
     }
 }
