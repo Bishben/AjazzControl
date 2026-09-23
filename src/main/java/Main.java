@@ -42,7 +42,7 @@ public class Main {
         requestData[1] = 85;
         requestData[2] = (byte) 204;
         requestData[3] = 51;   
-        requestData[4] = 15;
+        requestData[4] = 14;
 
         int writtenData = device.write(requestData, requestData.length, (byte) 0);
         System.out.println("Requested status data. Written " + writtenData + " bytes to the device.");
@@ -69,16 +69,6 @@ public class Main {
         }
 
         System.out.println("Device opened successfully!");
-
-        byte[] writeData = new byte[32];
-        writeData[0] = (byte) 170;
-        writeData[1] = 85;
-        writeData[2] = (byte) 204;
-        writeData[3] = 51;   
-        writeData[4] = 14;
-
-        int writtenData = device.write(writeData, writeData.length, (byte) 0);
-        System.out.println("Written " + writtenData + " bytes to the device.");
 
         requestStatusData(device);
 
