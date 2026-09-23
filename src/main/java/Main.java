@@ -68,6 +68,24 @@ public class Main {
         System.out.println("Set sleep time to Level " + sleepTime + ". Written " + writtenData + " bytes to the device.");
     }
 
+    public static void setResponseTime(HidDevice device, int responseTime) {
+        if (responseTime < 1 || responseTime > 4) {
+            System.out.println("[-] Invalid response time. Must be between 1 and 4.");
+            return;
+        }
+
+        byte[] writeData = new byte[32];
+        writeData[0] = (byte) 170;
+        writeData[1] = 85;
+        writeData[2] = (byte) 204;
+        writeData[3] = 51;   
+        writeData[4] = 13;  
+        writeData[5] = (byte) responseTime;
+
+        int writtenData = device.write(writeData, writeData.length, (byte) 0);
+        System.out.println("Set response time to Level " + responseTime + ". Written " + writtenData + " bytes to the device.");
+    }
+
     public static void main(String[] args) {
 
         HidServices hidServices = HidManager.getHidServices();
@@ -89,8 +107,8 @@ public class Main {
         System.out.println("Device opened successfully!");
 
         //requestStatusData(device);
-
-        setSleepTime(device, 2);
+        //setSleepTime(device, 2);
+        //setResponseTime(device, 1);
 
         int run = 0;
         while (run == 1) {
