@@ -1,6 +1,7 @@
 import org.hid4java.HidDevice;
 import org.hid4java.HidManager;
 import org.hid4java.HidServices;
+import java.util.Scanner;
 
 public class Main {
 
@@ -69,7 +70,7 @@ public class Main {
     }
 
     public static void setResponseTime(HidDevice device, int responseTime) {
-        if (responseTime < 1 || responseTime > 4) {
+        if (responseTime < 1 || responseTime > 3) {
             System.out.println("[-] Invalid response time. Must be between 1 and 4.");
             return;
         }
@@ -85,7 +86,8 @@ public class Main {
         int writtenData = device.write(writeData, writeData.length, (byte) 0);
         System.out.println("Set response time to Level " + responseTime + ". Written " + writtenData + " bytes to the device.");
     }
-
+    
+    // Lighting Modes:
     public static void setTurnOffLed(HidDevice device) {
         byte[] writeData = new byte[32];
         writeData[0] = (byte) 170;
@@ -99,7 +101,122 @@ public class Main {
         System.out.println("Turned off LED. Written " + writtenData + " bytes to the device.");
     }
 
+    public static void setLightEffect(HidDevice device, int effect) {
+        if (effect < 0 || effect > 22) {
+            System.out.println("[-] Invalid light effect. Must be between 0 and 22.");
+            return;
+        }
+
+        byte[] writeData = new byte[32];
+        writeData[0] = (byte) 170;
+        writeData[1] = 85;
+        writeData[2] = (byte) 204;
+        writeData[3] = 51;   
+        writeData[4] = 7;
+
+        writeData[6] = 4; // Brightness
+        writeData[7] = 2; // Speed
+        writeData[8] = 0; // Direction
+        writeData[9] = 7; // Color
+        
+        if (effect == 0) {
+            writeData[5] = 0; // Flow
+        } else if (effect == 1) {
+            writeData[5] = 1; // Starry
+        } else if (effect == 2) {
+            writeData[5] = 2; // Ripple
+        } else if (effect == 3) {
+            writeData[5] = 3; // Laser
+        } else if (effect == 4) {
+            writeData[5] = 4; // Spectrum
+        } else if (effect == 5) {
+            writeData[5] = 5; // Kaleidoscope
+        } else if (effect == 6) {
+            writeData[5] = 6; // Static
+            writeData[9] = 4; // Color
+        } else if (effect == 7) {
+            writeData[5] = 7; // Breathing
+        } else if (effect == 8) {
+            writeData[5] = 8; // Cross Flow
+        } else if (effect == 9) {
+            writeData[5] = 9; // Float
+        } else if (effect == 10) {
+            writeData[5] = 10; // Snow
+        } else if (effect == 11) {
+            writeData[5] = 11; // Jianghua
+        } else if (effect == 12) {
+            writeData[5] = 12; // Snake
+        } else if (effect == 13) {
+            writeData[5] = 13; // Tornado
+        } else if (effect == 14) {
+            writeData[5] = 14; // Impact
+        } else if (effect == 15) {
+            writeData[5] = 15; // Rain
+        } else if (effect == 16) {
+            writeData[5] = 16; // Windmill
+        } else if (effect == 17) {
+            writeData[5] = 17; // Sine
+        } else if (effect == 18) {
+            writeData[5] = 18; // Horse
+        } else if (effect == 19) {
+            writeData[5] = 19; // Cross
+        } else if (effect == 20) {
+            //writeData[5] = 20; // Custom
+        } else if (effect == 21) {
+            //writeData[5] = 21; // Ripple Glow (Music?)
+        } else if (effect == 22) {
+            setTurnOffLed(device); // Turn Off
+            return;
+        } else {
+            System.out.println("[-] Invalid light effect. Must be between 0 and 22.");
+            return;
+        }
+
+        int writtenData = device.write(writeData, writeData.length, (byte) 0);
+        System.out.println("Set light effect to " + effect + ". Written " + writtenData + " bytes to the device.");
+    }
+
+    public static int LightEffectsMenu(HidDevice device, Scanner scanner) {
+        System.out.println("Light Effects Menu:");
+        System.out.println("0: Flow");
+        System.out.println("1: Starry");
+        System.out.println("2: Ripple");
+        System.out.println("3: Laser");
+        System.out.println("4: Spectrum");
+        System.out.println("5: Kaleidoscope");
+        System.out.println("6: Static");
+        System.out.println("7: Breathing");
+        System.out.println("8: Cross Flow");
+        System.out.println("9: Float");
+        System.out.println("10: Snow");
+        System.out.println("11: Jianghua");
+        System.out.println("12: Snake");
+        System.out.println("13: Tornado");
+        System.out.println("14: Impact");
+        System.out.println("15: Rain");
+        System.out.println("16: Windmill");
+        System.out.println("17: Sine");
+        System.out.println("18: Horse");
+        System.out.println("19: Cross");
+        System.out.println("20: Custom"); // Not Implemented
+        System.out.println("21: Ripple Glow (Music?)"); // Not Implemented
+        System.out.println("22: Turn Off");
+        System.out.println("-1: Exit");
+        
+        System.out.print("Enter the number of the light effect you want to set: ");
+        int effect = scanner.nextInt();
+
+        if (effect == -1) {
+            System.out.println("Exiting Light Effects Menu.");
+            return 0;
+        }
+        setLightEffect(device, effect);
+        return 1;
+    }
+
     public static void main(String[] args) {
+
+        Scanner scanner = new Scanner(System.in);
 
         HidServices hidServices = HidManager.getHidServices();
 
@@ -119,14 +236,19 @@ public class Main {
 
         System.out.println("Device opened successfully!");
 
-        //requestStatusData(device);
+        requestStatusData(device);
         //setSleepTime(device, 2);
         //setResponseTime(device, 1);
-        setTurnOffLed(device);
+        //setTurnOffLed(device);
+        //setLightEffect(device, 1);
 
-        int run = 0;
+        int run = 1;
         while (run == 1) {
-            parseStatusData(device);
+            //parseStatusData(device);
+            run = LightEffectsMenu(device, scanner);
         }
+
+        device.close();
+        scanner.close();
     }
 }
